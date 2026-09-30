@@ -1,0 +1,7 @@
+Nguồn: data/logs.prechallenge.jsonl (sao lưu log thật trước challenge).
+Request/response có cùng correlation_id; response chứa trace_id thật.
+Ảnh 04-structured-log.png chụp log mới trong data/logs.jsonl của req-75c5179d,
+hiển thị timestamp, event, correlation_id, env, feature, model, latency và trace ID.
+
+{"service": "api", "payload": {"message_preview": "What is your refund policy?"}, "event": "request_received", "correlation_id": "req-63892c79", "feature": "qa", "model": "claude-sonnet-4-5", "session_id": "s-evidence", "user_id_hash": "67665bdf275f", "env": "dev", "level": "info", "ts": "2026-09-29T07:53:37.861286Z"}
+{"service": "api", "latency_ms": 1634, "ttft_ms": 50, "tokens_in": 28, "tokens_out": 36, "cost_usd": 0.000624, "quality_score": 0.9, "trace_id": "898fbbb9d59c5274d10b866c1c8e0817", "tool_name": "retrieval", "tool_success": true, "payload": {"answer_preview": "Refunds are available within 7 days with proof of purchase. Keep your purchase r..."}, "event": "response_sent", "correlation_id": "req-63892c79", "feature": "qa", "model": "claude-sonnet-4-5", "session_id": "s-evidence", "user_id_hash": "67665bdf275f", "env": "dev", "level": "info", "ts": "2026-09-29T07:53:39.902986Z"}

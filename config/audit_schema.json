@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ts", "actor", "action", "outcome", "correlation_id", "details"],
+  "properties": {
+    "ts": {"type": "string", "format": "date-time"},
+    "actor": {"type": "string"},
+    "action": {"enum": ["incident_enabled", "incident_disabled", "request_failed"]},
+    "outcome": {"enum": ["success", "error", "rejected"]},
+    "correlation_id": {"type": "string", "pattern": "^req-[0-9a-f]{8}$"},
+    "details": {"type": "object"}
+  }
+}

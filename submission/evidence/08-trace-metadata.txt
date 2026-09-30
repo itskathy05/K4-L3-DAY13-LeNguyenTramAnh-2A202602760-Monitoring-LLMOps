@@ -1,0 +1,16 @@
+Nguồn: Langfuse Observations API v2, trace 898fbbb9d59c5274d10b866c1c8e0817,
+generation a571511ab4d94d67.
+
+correlation_id=req-63892c79
+prompt_name=day13-chat
+prompt_label=baseline
+prompt_version=1
+prompt_source=langfuse
+model=claude-sonnet-4-5
+usage_details={"input":28,"output":36,"total":64}
+cost_details={"total":0.000624}
+raw_io_present=false
+
+Log response_sent cùng correlation ID có trace_id, latency_ms=1634,
+ttft_ms=50, tokens_in=28, tokens_out=36, cost_usd=0.000624.
+Cần bổ sung screenshot metadata trực tiếp từ Langfuse UI.

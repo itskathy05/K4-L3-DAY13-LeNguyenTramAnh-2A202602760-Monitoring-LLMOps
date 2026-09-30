@@ -20,3 +20,4 @@ Thư mục này gom toàn bộ tài liệu hướng dẫn và quy định của 
 - [blueprint-template.md](blueprint-template.md): khung thiết kế observability.
 - [grading-evidence.md](grading-evidence.md): checklist nhanh khi thu thập evidence.
 - [mock-debug-qa.md](mock-debug-qa.md): câu hỏi tự kiểm tra trước demo.
+- [DEMO_SCRIPT.md](DEMO_SCRIPT.md): kịch bản pitching 6 phút, thao tác và phương án dự phòng.

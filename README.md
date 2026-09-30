@@ -74,6 +74,12 @@ Chạy API ở terminal thứ nhất:
 uvicorn app.main:app --reload --env-file .env
 ```
 
+Mở `http://127.0.0.1:8000/chat-demo` (hoặc đổi sang cổng 8001 nếu bạn chạy
+server riêng ở cổng đó) để demo hội thoại bằng UI. Trang này gọi
+chính API `/chat`, hiển thị agent latency, browser round trip, token/cost mô phỏng,
+correlation ID và trace ID; từ đó mở log, trace hoặc dashboard. Đây là UI hỗ trợ
+pitching, không thay thế các evidence và checkpoint bắt buộc. Không nhập PII thật.
+
 Chạy baseline ở terminal thứ hai:
 
 ```bash
@@ -130,6 +136,8 @@ Chỉ chạy khi Lab Coach thông báo mở challenge của K4-L3A. Tại CP3, L
 ```bash
 python scripts/inject_incident.py
 python scripts/load_test.py --challenge --concurrency 5
+python scripts/inject_incident.py --disable
+python scripts/analyze_challenge.py
 ```
 
 Điều tra theo thứ tự:
@@ -138,6 +146,12 @@ python scripts/load_test.py --challenge --concurrency 5
 2. Lọc `data/logs.jsonl`, lấy một `correlation_id` của request bất thường.
 3. Tìm trace có cùng `correlation_id`, rồi so sánh các span.
 4. Ghi root cause, fix action và preventive measure vào `submission/REPORT.md`.
+
+Nếu cổng 8000 đã có API khác, chạy server lab trên 8001 và đặt
+`$env:LAB_BASE_URL='http://127.0.0.1:8001'` trong PowerShell trước khi chạy
+`inject_incident.py`/`load_test.py`. Có thể mở `/diagnostics/logs/{correlation_id}`
+và `/diagnostics/trace/{trace_id}` trên loopback để xem log đã scrub và metadata
+trace đọc live từ Langfuse; hai view này không thay thế ảnh Langfuse UI của CP2.
 
 Không tự tạo, sửa, chia sẻ hoặc lấy `config/challenge.json` từ lớp khác. Nếu chưa nhận file riêng, tiếp tục practice bằng tham số `--scenario`; không chạy challenge chính thức.
 
@@ -166,6 +180,39 @@ K4-L3-DAY13-HoVaTen-MSSV-Monitoring-LLMOps
 Ví dụ: `K4-L3-DAY13-NguyenVanAn-123456-Monitoring-LLMOps`. Mỗi học viên nộp URL repo cá nhân và commit SHA cuối trên VLearn LMS/Codelabs. Xem đầy đủ tại [docs/SUBMISSION.md](docs/SUBMISSION.md).
 
 Không push bài làm trực tiếp lên repo đề bài và không dùng chung repo bài nộp với học viên khác.
+
+## Chạy bản triển khai trong repository cá nhân
+
+Sau khi điền key Langfuse của project cá nhân vào `.env`, chạy API và mở
+`http://127.0.0.1:8000/dashboard`. Dashboard đọc `data/logs.jsonl`, hiển thị đúng
+6 panel trong cửa sổ 60 phút và refresh mỗi 30 giây. Để chạy thêm một API mà
+không chiếm cổng 8000, dùng `--port 8001` và đặt
+`LAB_BASE_URL=http://127.0.0.1:8001` trước khi gọi các script load/incident.
+
+Các lệnh kiểm tra và bonus:
+
+```powershell
+python scripts/prompt_workflow.py status
+python scripts/inspect_trace.py --recent-hours 2
+python scripts/inspect_trace.py --correlation-id req-12345678
+python scripts/compare_cost.py
+python scripts/audit_log.py query
+python scripts/audit_log.py prune
+python scripts/check_submission.py --scan-only
+python scripts/check_submission.py
+```
+
+`prompt_workflow.py bootstrap`, `promote` và `rollback` thay đổi prompt/label
+trong project Langfuse đang cấu hình. Chỉ chạy bootstrap khi project chưa có
+`day13-chat`; script không ghi đè version có sẵn. Sau đổi label cần khởi động
+lại API hoặc đợi cache prompt 60 giây trước khi lấy trace evidence. Lệnh
+`inspect_trace.py` dùng Observations API v2, chỉ in metadata an toàn, usage và
+cost; không in raw input/output. `FAKE_LLM_STYLE=concise` là chế độ tối ưu cost
+mô phỏng, cần restart API để áp dụng. Audit log và backup log baseline được
+Git ignore; xem [docs/AUDIT.md](docs/AUDIT.md) để biết schema và retention.
+
+Các ảnh Langfuse cần được chụp trực tiếp từ project của học viên. Challenge
+chính thức chỉ chạy khi Lab Coach cấp file riêng cho đúng lớp.
 
 ## Tài liệu trong repo
 

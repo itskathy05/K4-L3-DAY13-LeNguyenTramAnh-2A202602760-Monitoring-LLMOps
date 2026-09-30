@@ -1,0 +1,18 @@
+CP0 baseline — 2026-09-29, trước khi hoàn thiện TODO của CP1
+
+Python: 3.11.9
+GET /health: {"ok":true,"tracing_enabled":false,"incidents":{"rag_slow":false,"tool_fail":false,"cost_spike":false}}
+python scripts/load_test.py: 10/10 HTTP 200 (correlation_id còn là MISSING)
+python scripts/validate_logs.py:
+  Total log records analyzed: 21
+  Records with missing required fields: 20
+  Records with missing enrichment (context): 20
+  Unique correlation IDs found: 0
+  Potential PII leaks detected: 0
+  Estimated Score: 30/100
+python scripts/validate_dashboard.py: HỢP LỆ: 6/6 panel có trong dashboard contract.
+python -m pytest -q: 22 passed in 1.75s
+
+Sau khi cấu hình Langfuse, GET /health trả tracing_enabled=true; chạy lại
+workload vẫn cho baseline log validator 30/100 và 22 tests pass.
+Trace trên Langfuse cần xác minh trực tiếp bằng project cá nhân.

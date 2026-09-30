@@ -1,25 +1,28 @@
 alerts:
-  - name: TODO_alert_1
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: user_latency_p95_high
+    severity: critical
+    condition: 'latency_p95_ms > 3000 and request_count_5m >= 5'
+    duration: 5m
     type: symptom-based
     channel: slack
-    owner: TODO
+    slack_channel: '#day13-l3a-ops'
+    owner: student-operator
     runbook: docs/alerts.md#alert-1
-  - name: TODO_alert_2
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: user_request_error_rate_high
+    severity: critical
+    condition: 'error_rate_pct > 2 and request_count_5m >= 5'
+    duration: 5m
     type: symptom-based
     channel: slack
-    owner: TODO
+    slack_channel: '#day13-l3a-ops'
+    owner: student-operator
     runbook: docs/alerts.md#alert-2
-  - name: TODO_alert_3
-    severity: TODO
-    condition: TODO
-    duration: TODO
+  - name: user_cost_budget_high
+    severity: warning
+    condition: 'cost_usd_24h > 2.5'
+    duration: 10m
     type: symptom-based
     channel: slack
-    owner: TODO
+    slack_channel: '#day13-l3a-ops'
+    owner: student-operator
     runbook: docs/alerts.md#alert-3

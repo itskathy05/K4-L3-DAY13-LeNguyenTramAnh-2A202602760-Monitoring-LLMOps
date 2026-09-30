@@ -1,0 +1,7 @@
+Official CP3 log evidence from data/logs.jsonl. Screenshot 13-incident-log.png shows the local read-only log view of these matching records.
+Challenge ID: day13-k4-l3a-monitoring-llmops-v1
+Correlation ID: req-75c5179d
+Request received: 2026-09-29T08:25:55.272423Z; feature=monitoring.
+Response sent: 2026-09-29T08:25:57.926567Z; latency_ms=2653; ttft_ms=50; tool_success=true; trace_id=4e86a88524e80a4b0a8e29bc6ce8887a.
+Exact selected response log line:
+{"service": "api", "latency_ms": 2653, "ttft_ms": 50, "tokens_in": 36, "tokens_out": 49, "cost_usd": 0.000843, "quality_score": 0.9, "trace_id": "4e86a88524e80a4b0a8e29bc6ce8887a", "tool_name": "retrieval", "tool_success": true, "payload": {"answer_preview": "Metrics reveal symptoms, logs locate requests, traces explain failures, and PII ..."}, "event": "response_sent", "env": "dev", "user_id_hash": "ed72e61117f6", "feature": "monitoring", "model": "claude-sonnet-4-5", "session_id": "k4-l3a-challenge-s05", "correlation_id": "req-75c5179d", "level": "info", "ts": "2026-09-29T08:25:57.926567Z"}

@@ -1,0 +1,26 @@
+name: Verify lab
+on:
+  push:
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest -q
+      - run: python scripts/validate_dashboard.py
+      - run: python scripts/check_submission.py --scan-only
+      - name: Runtime log gate
+        shell: bash
+        run: |
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/day13-api.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:8000/health > /dev/null; then break; fi
+            sleep 1
+          done
+          python scripts/load_test.py
+          python scripts/validate_logs.py | grep 'Estimated Score: 100/100'

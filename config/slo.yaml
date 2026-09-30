@@ -7,7 +7,11 @@ primary_slo:
     total_event: 'event == "request_received"'
   target_percent: 99.5
   error_budget_percent: 0.5
-  note: Học viên phải giải thích hoặc điều chỉnh ngưỡng bằng baseline của mình.
+  note: >-
+    Good request là response_sent trong tối đa 3000 ms. Với mục tiêu 99.5%,
+    error budget là 0.5% tổng request trong cửa sổ 28 ngày: 50 bad requests
+    trên 10000 requests. Ngưỡng 3000 ms giữ theo dashboard contract; baseline
+    và incident runtime được đối chiếu trong submission/REPORT.md.
 guardrails:
   error_rate_pct_max: 2
   daily_cost_usd_max: 2.5

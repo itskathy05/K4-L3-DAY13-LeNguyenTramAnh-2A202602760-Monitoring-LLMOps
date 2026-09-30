@@ -1,0 +1,11 @@
+Nguồn: thao tác và trace thật trong project day13-k4-l3a-2A202602760.
+Cùng input: "What is your refund policy?"
+
+baseline v1: trace=898fbbb9d59c5274d10b866c1c8e0817, correlation=req-63892c79
+candidate v2: trace=c32f2e15d24a81ac888d1c4aad3f0abe, correlation=req-168d01a5
+promote production→v2: trace=48166ea6c62854ef10c6dc1270e17c1c, correlation=req-3dd2c6b9
+rollback production→v1: trace=fd41c08551c210a97df562e213d6b37a, correlation=req-d02e0eb6
+
+Mỗi trace được xác minh bằng Langfuse Observations API v2; prompt_source=langfuse.
+Trạng thái cuối: baseline/production=v1, candidate=v2.
+Cần bổ sung screenshot trạng thái trước/sau trên Langfuse UI.

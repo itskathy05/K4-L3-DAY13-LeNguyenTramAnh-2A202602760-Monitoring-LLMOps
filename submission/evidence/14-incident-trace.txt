@@ -1,0 +1,10 @@
+Official CP3 trace evidence queried live from Langfuse Observations API v2.
+Command: python scripts/inspect_trace.py 4e86a88524e80a4b0a8e29bc6ce8887a
+Challenge ID: day13-k4-l3a-monitoring-llmops-v1
+Correlation ID: req-75c5179d (also matched by --correlation-id: 3 observations, one trace).
+Trace ID: 4e86a88524e80a4b0a8e29bc6ce8887a
+Root AGENT lab-agent-run: observation 20604eab0ffd3394; parent=null; latency 2.653 s; prompt day13-chat production v1.
+Child RETRIEVER retrieval: observation 44104209d43c26b7; parent 20604eab0ffd3394; latency 2.501 s.
+Child GENERATION fake-llm-generation: observation 45b46a737ff2eb04; parent 20604eab0ffd3394; latency 0.152 s; model claude-sonnet-4-5; input 36 tokens; output 49 tokens; cost 0.000843 USD.
+All three observations contain correlation ID req-75c5179d; raw input/output absent. Screenshot 14-incident-trace.jpg is from the Langfuse UI and shows the rounded durations alongside the correlation ID. The supplemental 14-incident-trace-api-view.png displays the API observations in a local read-only view.
+Conclusion: retrieval accounts for about 94% of agent latency. The injected rag_slow path calls time.sleep(2.5) in app/mock_rag.py; generation is not the bottleneck. The synchronous call inside the async /chat endpoint also serializes concurrent requests, amplifying client wall latency.

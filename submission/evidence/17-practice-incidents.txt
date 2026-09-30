@@ -1,0 +1,11 @@
+Ba kịch bản practice, không phải challenge chính thức của Lab Coach:
+
+rag_slow: dashboard P95 trước=1657 ms, sau=2654 ms;
+          request chậm có correlation_id trong data/logs.jsonl và retrieval span.
+tool_fail: dashboard error rate=30.30%, retrieval success=69.70%;
+           correlation_id=req-5eee9599 → trace_id=1a5d43c788adfad47370c82c34d8b079;
+           trace có root và retriever, request HTTP 500.
+cost_spike: tổng cost trong cửa sổ 60 phút trước=0.017760 USD,
+            sau=0.045909 USD; generation output tokens và cost tăng.
+
+Sau mỗi practice đã gọi --disable để tắt incident.

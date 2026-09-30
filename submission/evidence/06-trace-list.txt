@@ -1,0 +1,17 @@
+Nguồn: Langfuse Observations API v2 của project day13-k4-l3a-2A202602760.
+10 trace IDs dưới đây được tạo bởi một lần chạy chính workload 10 request,
+python scripts/load_test.py --concurrency 5 trên API local đã cấu hình key cá nhân.
+
+75e2704e18f35e836614d7757fc27278
+684ce66aef8067d7eab667433f1baf6c
+9c5e6646cdadf10ee13f847dfc70b1a5
+cbaf938a33b6cf326045c928f819cb6d
+bb7e133bc0b592b7d6ba8389c4e29aed
+dd2d858c716f002549b9b1e9dd074cef
+a9b0fa51f77baee182bde0aa04f991f2
+7a8d111dcb9f85f724fcee8d12a3ce0e
+1385238f7cf89d95250d4f954bdbe5b7
+5f9e850a88c6988f1c03523e9cc12368
+
+Cần bổ sung screenshot danh sách trace trực tiếp từ Langfuse UI nếu giảng viên
+yêu cầu ảnh thay vì output API.

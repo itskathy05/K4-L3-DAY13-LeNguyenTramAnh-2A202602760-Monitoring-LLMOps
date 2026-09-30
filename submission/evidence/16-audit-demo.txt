@@ -1,0 +1,9 @@
+Nguồn: data/audit.jsonl và scripts/audit_log.py; log riêng được Git ignore.
+
+python scripts/audit_log.py query --correlation-id req-5eee9599
+{"ts": "2026-09-29T07:59:27.636521+00:00", "actor": "local-lab-operator", "action": "request_failed", "outcome": "error", "correlation_id": "req-5eee9599", "details": {"error_type": "RuntimeError"}}
+
+python scripts/audit_log.py prune
+retention_days=30 total=20 remove=0 apply=False
+
+Schema: config/audit_schema.json. Retention và truy vấn: docs/AUDIT.md.

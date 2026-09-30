@@ -1,0 +1,13 @@
+Official CP3 incident metric, generated from the original coach file and data/logs.jsonl.
+Command: python scripts/analyze_challenge.py
+Challenge ID: day13-k4-l3a-monitoring-llmops-v1
+Cohort: K4; seed: 1311; incident: rag_slow; affected feature: monitoring.
+Original coach file and ignored config/challenge.json share SHA-256 B11E6286F35CDE0D744ADC5EDCB5E0A9CDFFCA865EB281B2C481219B2C86F6BF.
+Challenge latency threshold: 2000 ms. This is separate from the dashboard's 3000 ms SLO line.
+Incident enabled: 2026-09-29T08:25:50.558320Z
+Incident disabled: 2026-09-29T08:26:13.883527Z
+Baseline with same five challenge sessions before injection: 5 requests; P50 151 ms; P95 1864 ms; 0/5 above 2000 ms.
+During incident: 5 requests; P50 2654 ms; P95 2654 ms; 5/5 above 2000 ms.
+Dashboard 60-minute window after injection: P50 2653 ms; P95 2654 ms; TTFT P95 50 ms; 10 requests; 0 errors; retrieval success 100%.
+The screenshot 12-incident-metric.png is the live dashboard after the official incident. Its 3000 ms line is the project SLO, not the challenge-specific threshold.
+Client-side wall times for the concurrent incident workload were approximately 13.3 s because the synchronous retrieval delay blocked the async endpoint's event loop. The dashboard latency field measures agent execution, not queued end-to-end response time.

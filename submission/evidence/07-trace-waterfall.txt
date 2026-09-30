@@ -1,0 +1,9 @@
+Nguồn: python scripts/inspect_trace.py 898fbbb9d59c5274d10b866c1c8e0817
+Langfuse Observations API v2 trả ba observations cùng trace ID:
+
+AGENT      lab-agent-run        id=6db7e23eea1f8717 parent=null
+RETRIEVER  retrieval            id=424db21408295245 parent=6db7e23eea1f8717
+GENERATION fake-llm-generation  id=a571511ab4d94d67 parent=6db7e23eea1f8717
+
+Correlation ID trên root/generation: req-63892c79. Raw I/O present: false.
+Cần bổ sung screenshot waterfall trực tiếp từ Langfuse UI.

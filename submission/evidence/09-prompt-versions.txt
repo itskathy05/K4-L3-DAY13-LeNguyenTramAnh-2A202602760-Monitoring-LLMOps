@@ -1,0 +1,15 @@
+Nguồn: python scripts/prompt_workflow.py status, Langfuse project cá nhân.
+Prompt: day13-chat, type=text, ba biến feature/docs/message được giữ nguyên.
+
+Sau bootstrap:
+version=1 labels=['baseline', 'production']
+version=2 labels=['candidate', 'latest']
+
+Sau rollback (trạng thái cuối):
+version=1 labels=['baseline', 'production']
+version=2 labels=['candidate', 'latest']
+label=baseline version=1
+label=candidate version=2
+label=production version=1
+
+Cần bổ sung screenshot hai version trực tiếp từ Langfuse UI.

@@ -1,0 +1,9 @@
+Lệnh: python scripts/compare_cost.py
+Workload: data/sample_queries.jsonl, 10 request giống hệt nhau ở hai chế độ.
+Cost là ước lượng mô phỏng của fake LLM, không phải hóa đơn nhà cung cấp.
+
+standard: input_tokens=346, output_tokens=442, estimated_cost_usd=0.007668,
+          quality_mean=0.88, expected_answer_checks_passed=true
+concise:  input_tokens=346, output_tokens=243, estimated_cost_usd=0.004683,
+          quality_mean=0.86, expected_answer_checks_passed=true
+cost_reduction_pct=38.93; guardrails_passed=true

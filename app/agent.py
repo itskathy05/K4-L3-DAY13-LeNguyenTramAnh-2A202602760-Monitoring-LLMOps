@@ -3,11 +3,13 @@ from __future__ import annotations
 import os
 import time
 from dataclasses import dataclass
+from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
 
 from . import metrics
 from .mock_llm import FakeLLM
 from .mock_rag import retrieve
-from .pii import hash_user_id, summarize_text
+from .pii import hash_user_id, scrub_text, summarize_text
 from .prompt_management import resolve_prompt
 from .tracing import get_langfuse_client, observe, propagate_attributes, tracing_enabled
 
@@ -21,6 +23,7 @@ class AgentResult:
     tokens_out: int
     cost_usd: float
     quality_score: float
+    trace_id: str | None = None
 
 
 class LabAgent:
@@ -38,26 +41,53 @@ class LabAgent:
         correlation_id: str,
     ) -> AgentResult:
         langfuse_client = get_langfuse_client()
+        enabled = tracing_enabled()
         with propagate_attributes(
             user_id=hash_user_id(user_id),
-            session_id=session_id,
-            tags=["lab", feature, self.model],
+            session_id=hash_user_id(session_id),
+            tags=["lab", scrub_text(feature), self.model],
             trace_name="day13-agent-request",
             environment=os.getenv("APP_ENV", "dev"),
             metadata={
-                "feature": feature,
+                "feature": scrub_text(feature),
                 "model": self.model,
                 "correlation_id": correlation_id,
             },
         ):
+            trace_id = (
+                getattr(langfuse_client, "get_current_trace_id", lambda: None)()
+                if enabled else None
+            )
             started = time.perf_counter()
-            docs = retrieve(message)
+            retrieval_scope = (
+                langfuse_client.start_as_current_observation(
+                    as_type="retriever",
+                    name="retrieval",
+                    metadata={"query_preview": summarize_text(message)},
+                )
+                if enabled
+                else nullcontext()
+            )
+            with retrieval_scope as retrieval_span:
+                try:
+                    docs = retrieve(message)
+                except Exception as exc:
+                    if retrieval_span is not None:
+                        retrieval_span.update(
+                            level="ERROR",
+                            status_message=type(exc).__name__,
+                            metadata={"success": False, "error_type": type(exc).__name__},
+                        )
+                    raise
+                else:
+                    if retrieval_span is not None:
+                        retrieval_span.update(metadata={"doc_count": len(docs), "success": True})
             prompt = resolve_prompt(
                 langfuse_client,
                 feature=feature,
                 docs=docs,
                 message=message,
-                enabled=tracing_enabled(),
+                enabled=enabled,
             )
             langfuse_client.update_current_span(
                 metadata={
@@ -71,13 +101,43 @@ class LabAgent:
                 },
                 version=prompt.version,
             )
-            # TODO (CP2): instrument retrieve() and FakeLLM.generate() as child
-            # observations. The nested generation must receive prompt, usage and cost.
             with propagate_attributes(prompt=prompt.managed_prompt):
-                response = self.llm.generate(prompt.text)
+                generation_scope = (
+                    langfuse_client.start_as_current_observation(
+                        as_type="generation",
+                        name="fake-llm-generation",
+                        model=self.model,
+                        prompt=prompt.managed_prompt,
+                        metadata={
+                            "correlation_id": correlation_id,
+                            "prompt_name": prompt.name,
+                            "prompt_label": prompt.label,
+                            "prompt_version": prompt.version,
+                            "prompt_source": prompt.source,
+                        },
+                    )
+                    if enabled
+                    else nullcontext()
+                )
+                with generation_scope as generation_span:
+                    generation_started = datetime.now(timezone.utc)
+                    response = self.llm.generate(prompt.text)
+                    cost_usd = self._estimate_cost(
+                        response.usage.input_tokens, response.usage.output_tokens
+                    )
+                    if generation_span is not None:
+                        generation_span.update(
+                            model=response.model,
+                            usage_details={
+                                "input": response.usage.input_tokens,
+                                "output": response.usage.output_tokens,
+                            },
+                            cost_details={"total": cost_usd},
+                            completion_start_time=generation_started
+                            + timedelta(milliseconds=response.ttft_ms),
+                        )
             quality_score = self._heuristic_quality(message, response.text, docs)
             latency_ms = int((time.perf_counter() - started) * 1000)
-            cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
 
         metrics.record_request(
             latency_ms=latency_ms,
@@ -96,6 +156,7 @@ class LabAgent:
             tokens_out=response.usage.output_tokens,
             cost_usd=cost_usd,
             quality_score=quality_score,
+            trace_id=trace_id,
         )
 
     def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:

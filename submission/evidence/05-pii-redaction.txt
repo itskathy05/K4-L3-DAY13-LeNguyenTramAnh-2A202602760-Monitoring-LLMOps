@@ -1,0 +1,15 @@
+Nguồn: workload data/sample_queries.jsonl và một request CCCD test tự chạy;
+trích các dòng request_received thật từ data/logs.jsonl. Input PII giả nằm
+trong fixture/test, không được chép nguyên văn vào evidence.
+
+req-c9f8857a: What is your refund policy? My email is [REDACTED_EMAIL]
+req-781e5ec9: Here is my phone [REDACTED_PHONE_VN], what should be logged?
+req-50901b0b: CCCD [REDACTED_CCCD]: what should be logged?
+req-07de4ecb: What is the policy for PII and credit card [REDACTED_CREDIT_CARD]?
+
+Request PII giả mới req-eeee0001 chứa đồng thời email, điện thoại VN, CCCD
+và thẻ thanh toán ở input. Dòng request_received thật trong data/logs.jsonl:
+"message_preview": "[REDACTED_EMAIL] [REDACTED_PHONE_VN] [REDACTED_CCCD] [REDACTED_CREDIT_CARD]"
+Ảnh 05-pii-redaction.png chụp view log trực tiếp theo correlation ID này.
+python scripts/validate_logs.py: Potential PII leaks detected: 0.
+Regex và test tương ứng nằm trong app/pii.py và tests/test_observability_end_to_end.py.

@@ -5,9 +5,14 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse
 from structlog.contextvars import bind_contextvars
 
 from .agent import LabAgent
+from .audit import record_audit
+from .chat_demo import CHAT_DEMO_HTML
+from .dashboard import DASHBOARD_HTML, build_dashboard_snapshot
+from .diagnostics import render_log_view, render_trace_view
 from .incidents import disable, enable, status
 from .logging_config import configure_logging, get_logger
 from .metrics import record_error, snapshot
@@ -46,11 +51,40 @@ async def metrics() -> dict:
     return snapshot()
 
 
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard() -> HTMLResponse:
+    return HTMLResponse(DASHBOARD_HTML)
+
+
+@app.get("/chat-demo", response_class=HTMLResponse)
+async def chat_demo() -> HTMLResponse:
+    return HTMLResponse(CHAT_DEMO_HTML)
+
+
+@app.get("/dashboard/data")
+async def dashboard_data() -> dict:
+    return build_dashboard_snapshot()
+
+
+@app.get("/diagnostics/logs/{correlation_id}", response_class=HTMLResponse)
+def diagnostic_log(request: Request, correlation_id: str) -> HTMLResponse:
+    return render_log_view(request, correlation_id)
+
+
+@app.get("/diagnostics/trace/{trace_id}", response_class=HTMLResponse)
+def diagnostic_trace(request: Request, trace_id: str) -> HTMLResponse:
+    return render_trace_view(request, trace_id)
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    # TODO: Enrich logs with request context (user_id_hash, session_id, feature, model, env)
-    # bind_contextvars(...)
-    
+    bind_contextvars(
+        user_id_hash=hash_user_id(body.user_id),
+        session_id=body.session_id,
+        feature=body.feature,
+        model=agent.model,
+        env=os.getenv("APP_ENV", "dev"),
+    )
     log.info(
         "request_received",
         service="api",
@@ -73,6 +107,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             tokens_out=result.tokens_out,
             cost_usd=result.cost_usd,
             quality_score=result.quality_score,
+            trace_id=result.trace_id,
             tool_name="retrieval",
             tool_success=True,
             payload={"answer_preview": summarize_text(result.answer)},
@@ -86,6 +121,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             tokens_out=result.tokens_out,
             cost_usd=result.cost_usd,
             quality_score=result.quality_score,
+            trace_id=result.trace_id,
         )
     except Exception as exc:  # pragma: no cover
         error_type = type(exc).__name__
@@ -98,24 +134,32 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             tool_success=False if isinstance(exc, RuntimeError) else None,
             payload={"detail": str(exc), "message_preview": summarize_text(body.message)},
         )
+        record_audit(
+            "request_failed", request.state.correlation_id, "error",
+            {"error_type": error_type},
+        )
         raise HTTPException(status_code=500, detail=error_type) from exc
 
 
 @app.post("/incidents/{name}/enable")
-async def enable_incident(name: str) -> JSONResponse:
+async def enable_incident(name: str, request: Request) -> JSONResponse:
     try:
         enable(name)
         log.warning("incident_enabled", service="control", payload={"name": name})
+        record_audit("incident_enabled", request.state.correlation_id, "success", {"scenario": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
+        record_audit("incident_enabled", request.state.correlation_id, "rejected", {"scenario": name})
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.post("/incidents/{name}/disable")
-async def disable_incident(name: str) -> JSONResponse:
+async def disable_incident(name: str, request: Request) -> JSONResponse:
     try:
         disable(name)
         log.warning("incident_disabled", service="control", payload={"name": name})
+        record_audit("incident_disabled", request.state.correlation_id, "success", {"scenario": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
+        record_audit("incident_disabled", request.state.correlation_id, "rejected", {"scenario": name})
         raise HTTPException(status_code=404, detail=str(exc)) from exc

@@ -18,7 +18,7 @@ Tên file gợi ý:
 11-dashboard-overview.png
 12-incident-metric.png
 13-incident-log.png
-14-incident-trace.png
+14-incident-trace.jpg
 ```
 
 Có thể dùng `.txt` cho output của tests/validators. Có thể tách dashboard thành nhiều ảnh nếu một ảnh không đọc rõ.
